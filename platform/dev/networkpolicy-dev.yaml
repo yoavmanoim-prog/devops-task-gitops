@@ -1,0 +1,20 @@
+# Default-deny cross-namespace ingress: dev and staging share one cluster,
+# so this (plus the AppProject/namespace/quota split) is what actually keeps
+# them apart, rather than a separate control plane. Known limitation - the
+# VPC CNI must have network policy enforcement explicitly enabled for this
+# to be enforced in-cluster (not just accepted by the API); see infra's
+# README for that flag. Traffic entering via the ALB (target-type ip) reaches
+# pods directly through the VPC, outside this podSelector-based rule, so it
+# is unaffected either way.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-other-namespaces
+  namespace: dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
