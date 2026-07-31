@@ -1,8 +1,9 @@
 # Generic defaults. Nothing application-specific lives here - every real
-# deployment is one of apps/{dev,staging,production} which layers its own
-# values file on top of this one. image.tag has no default on purpose (see
-# below): this chart fails closed rather than silently falling back to
-# :latest if a caller forgets to set one.
+# deployment layers one of apps/*/values-*.yaml on top of this one. (staging
+# is a values file under apps/dev/, not its own directory - it's a second
+# namespace on the dev cluster, not a second cluster.) image.tag has no
+# default on purpose (see below): this chart fails closed rather than
+# silently falling back to :latest if a caller forgets to set one.
 
 replicaCount: 1
 

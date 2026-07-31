@@ -1,5 +1,5 @@
 # PLACEHOLDER image until the app repo's CI pushes the real ECR tag here.
-# devops-task-app's ci.yaml bumps image.repository/image.tag in this exact
+# devops-task-app's dev.yaml workflow bumps image.repository/image.tag in this
 # file on every push to its `dev` branch (auto-sync); until that first run,
 # this points at a small pinned public image (never :latest) with probe
 # paths overridden to match it, purely so this Application is sync-able
