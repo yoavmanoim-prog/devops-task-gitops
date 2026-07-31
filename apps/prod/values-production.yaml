@@ -15,7 +15,10 @@ readinessProbe:
     path: /
     port: http
 
-replicaCount: 3
+# NOTE: no replicaCount here on purpose. autoscaling.enabled below means the
+# chart's deployment template omits `replicas` entirely and the HPA owns it -
+# so a replicaCount line would be inert config that still *reads* like it sets
+# the replica count. minReplicas is the real floor.
 
 resources:
   requests:
