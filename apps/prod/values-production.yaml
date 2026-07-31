@@ -34,6 +34,10 @@ autoscaling:
 ingress:
   enabled: true
   host: app.devops-task.internal # placeholder - no real DNS/ACM wired up, see README
+  annotations:
+    # opt-in override of the chart's internal-by-default scheme - see
+    # apps/dev/values-dev.yaml's comment
+    alb.ingress.kubernetes.io/scheme: internet-facing
 
 env:
   - name: APP_ENV
