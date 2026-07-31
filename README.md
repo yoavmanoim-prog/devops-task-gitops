@@ -54,7 +54,7 @@ everything else falls back to `charts/app/values.yaml`'s defaults:
 |---|---|
 | `image.repository`/`image.tag` (owned by CI, see above) | `podSecurityContext`/`securityContext` (non-root, read-only rootfs) |
 | `replicaCount`, `resources` | `service.port`/`targetPort` |
-| `ingress.host` | `ingress.annotations` (ALB scheme/target-type) |
+| `ingress.host`, `ingress.annotations.scheme` (opt-in to `internet-facing` - see below) | `ingress.annotations.target-type`/`listen-ports` |
 | `env`, `configMap.data` | - |
 | `externalSecret.remoteRef.key` (per-env secret path) | `externalSecret.secretStoreRef` |
 
@@ -63,6 +63,13 @@ error rather than silently falling back to any implicit tag.
 
 ## Known limitations
 
+- **~~Ingress defaulted to public exposure~~ - fixed.** A security-review pass caught that the
+  chart's `ingress.annotations` scheme defaulted to `internet-facing` with no per-env override -
+  every environment silently inherited public exposure, backwards from secure-by-default for a
+  "generic, reusable chart." Fixed: the chart now defaults to `internal`; each of the 3 env values
+  files explicitly opts back into `internet-facing` (this demo genuinely wants external ALB
+  routing exercised, per spec 3.3) - public exposure is now a visible, per-env, auditable choice
+  instead of an inherited default.
 - **NetworkPolicy enforcement is not verified.** `platform/dev/networkpolicy-{dev,staging}.yaml`
   are what's meant to keep the `dev` and `staging` namespaces apart on their one shared cluster,
   but enforcement depends on the VPC CNI's network policy feature, which nothing in the `infra`

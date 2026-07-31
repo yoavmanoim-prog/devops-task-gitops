@@ -41,7 +41,14 @@ ingress:
   enabled: false
   className: alb
   annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
+    # internal by default - a generic/reusable chart shouldn't default to
+    # public exposure. A security-review pass flagged the previous default
+    # (internet-facing) as backwards from secure-by-default, since none of
+    # the per-env values files overrode it - every environment silently
+    # inherited public exposure. Environments that actually want public
+    # ingress (this demo's do, to exercise ALB external routing per spec)
+    # override this one annotation explicitly in their own values file.
+    alb.ingress.kubernetes.io/scheme: internal
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
     # TLS termination strategy (documented, not provisioned for this demo):
