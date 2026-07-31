@@ -1,0 +1,25 @@
+# Namespace/ResourceQuota/NetworkPolicy are ArgoCD-managed (not Terraform) -
+# this Application is what actually reconciles platform/dev/. CreateNamespace
+# is harmless here even though the manifests already declare Namespace
+# objects directly; kept for consistency with the workload ApplicationSet
+# below, which does need it.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-dev-cluster
+  namespace: argocd
+spec:
+  project: dev
+  source:
+    repoURL: https://github.com/yoavmanoim-prog/devops-task-gitops.git
+    targetRevision: HEAD
+    path: platform/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,49 @@
+# PLACEHOLDER image until the app repo's CI pushes the real ECR tag here.
+# devops-task-app's ci.yaml bumps image.repository/image.tag in this exact
+# file on every push to its `dev` branch (auto-sync); until that first run,
+# this points at a small pinned public image (never :latest) with probe
+# paths overridden to match it, purely so this Application is sync-able
+# today. Once CI takes over, image + probes revert to the chart defaults
+# that match the real FastAPI app (/healthz, /readyz).
+image:
+  repository: public.ecr.aws/nginx/nginx
+  tag: "1.27"
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+ingress:
+  enabled: true
+  host: dev.devops-task.internal # placeholder - no real DNS/ACM wired up, see README
+
+env:
+  - name: APP_ENV
+    value: dev
+
+configMap:
+  enabled: true
+  data:
+    APP_TIER: dev
+
+externalSecret:
+  enabled: true
+  target:
+    name: app-secret
+  remoteRef:
+    key: devops-task/dev/app-secret

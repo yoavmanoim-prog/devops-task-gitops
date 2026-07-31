@@ -1,0 +1,6 @@
+apiVersion: v2
+name: app
+description: Generic, reusable Helm chart for a standard web application or microservice
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

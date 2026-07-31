@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: dev
+  namespace: argocd
+spec:
+  description: >-
+    Dev cluster - hosts the dev and staging namespaces on one shared control
+    plane, isolated from each other by namespace + quota + network policy
+    rather than by a separate cluster.
+  sourceRepos:
+    - https://github.com/yoavmanoim-prog/devops-task-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: dev
+    - server: https://kubernetes.default.svc
+      namespace: staging
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

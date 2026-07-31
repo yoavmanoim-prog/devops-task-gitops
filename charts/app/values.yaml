@@ -1,0 +1,98 @@
+# Generic defaults. Nothing application-specific lives here - every real
+# deployment is one of apps/{dev,staging,production} which layers its own
+# values file on top of this one. image.tag has no default on purpose (see
+# below): this chart fails closed rather than silently falling back to
+# :latest if a caller forgets to set one.
+
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: "" # required - see templates/deployment.yaml's `required` guard
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsUser: 1000
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: false
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    # TLS termination strategy (documented, not provisioned for this demo):
+    # once an ACM certificate exists for the ingress host, uncomment:
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:<account>:certificate/<id>
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    # alb.ingress.kubernetes.io/ssl-redirect: "443"
+  host: ""
+  path: /
+  pathType: Prefix
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+# Plain (non-secret) env vars, e.g. [{name: APP_ENV, value: dev}]
+env: []
+
+configMap:
+  enabled: true
+  data: {}
+
+# Backed by the cluster's ClusterSecretStore (see infra's external-secrets
+# module) - disabled by default since not every deployment of this chart
+# needs a secret.
+externalSecret:
+  enabled: false
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
+  refreshInterval: 1h
+  target:
+    name: ""
+  remoteRef:
+    key: ""
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: http

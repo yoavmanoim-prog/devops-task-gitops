@@ -1,0 +1,52 @@
+# PLACEHOLDER image - see apps/dev/values-dev.yaml's comment. Production's
+# tag is promoted from staging by a human PR (reads staging's current tag,
+# writes it here); the manual-sync Application above is the actual
+# deployment gate, this file landing is not the same as it going live.
+image:
+  repository: public.ecr.aws/nginx/nginx
+  tag: "1.27"
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+replicaCount: 3
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 65
+
+ingress:
+  enabled: true
+  host: app.devops-task.internal # placeholder - no real DNS/ACM wired up, see README
+
+env:
+  - name: APP_ENV
+    value: production
+
+configMap:
+  enabled: true
+  data:
+    APP_TIER: production
+
+externalSecret:
+  enabled: true
+  target:
+    name: app-secret
+  remoteRef:
+    key: devops-task/production/app-secret

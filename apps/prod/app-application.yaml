@@ -1,0 +1,26 @@
+# Deliberately no `automated:` sync policy - production stays a manual,
+# human-triggered gate (click Sync in the ArgoCD UI/CLI). The promotion PR
+# (staging -> prod) lands the new image tag in this file immediately, but
+# nothing rolls out until someone approves the sync - the tag landing in
+# Git and the tag actually running are two separate, deliberately decoupled
+# events for this one environment.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-production
+  namespace: argocd
+spec:
+  project: prod
+  source:
+    repoURL: https://github.com/yoavmanoim-prog/devops-task-gitops.git
+    targetRevision: HEAD
+    path: charts/app
+    helm:
+      valueFiles:
+        - ../../apps/prod/values-production.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,39 @@
+# The concrete ApplicationSet demonstration the spec asks for: one cluster
+# (dev), one chart, fanned out to both namespaces it hosts via a list
+# generator. Each generated Application points the same charts/app source at
+# a different namespace + a different values file living alongside this one
+# in apps/dev/ - the chart itself never changes between dev and staging.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: app-dev-cluster
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - namespace: dev
+            valuesFile: values-dev.yaml
+          - namespace: staging
+            valuesFile: values-staging.yaml
+  template:
+    metadata:
+      name: "app-{{namespace}}"
+    spec:
+      project: dev
+      source:
+        repoURL: https://github.com/yoavmanoim-prog/devops-task-gitops.git
+        targetRevision: HEAD
+        path: charts/app
+        helm:
+          valueFiles:
+            - ../../apps/dev/{{valuesFile}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

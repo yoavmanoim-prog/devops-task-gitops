@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: prod
+  namespace: argocd
+spec:
+  description: Prod cluster - hosts only the production namespace.
+  sourceRepos:
+    - https://github.com/yoavmanoim-prog/devops-task-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: production
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

@@ -1,0 +1,47 @@
+# PLACEHOLDER image - see values-dev.yaml's comment. Staging's tag is
+# promoted from dev by a human PR against this file (reads dev's current
+# tag, writes it here), not rebuilt - "build once, promote the same
+# artifact." Until the first promotion, it points at the same pinned
+# placeholder image as dev.
+image:
+  repository: public.ecr.aws/nginx/nginx
+  tag: "1.27"
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+ingress:
+  enabled: true
+  host: staging.devops-task.internal # placeholder - no real DNS/ACM wired up, see README
+
+env:
+  - name: APP_ENV
+    value: staging
+
+configMap:
+  enabled: true
+  data:
+    APP_TIER: staging
+
+externalSecret:
+  enabled: true
+  target:
+    name: app-secret
+  remoteRef:
+    key: devops-task/staging/app-secret
