@@ -6,17 +6,8 @@
 # today. Once CI takes over, image + probes revert to the chart defaults
 # that match the real FastAPI app (/healthz, /readyz).
 image:
-  repository: public.ecr.aws/nginx/nginx
-  tag: "1.27"
-
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
+  repository: 302954730632.dkr.ecr.us-east-1.amazonaws.com/devops-task-app
+  tag: "sha-05859b5"
 
 replicaCount: 1
 
