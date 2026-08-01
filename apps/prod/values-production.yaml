@@ -3,17 +3,8 @@
 # writes it here); the manual-sync Application above is the actual
 # deployment gate, this file landing is not the same as it going live.
 image:
-  repository: public.ecr.aws/nginx/nginx
-  tag: "1.27"
-
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
+  repository: 302954730632.dkr.ecr.us-east-1.amazonaws.com/devops-task-app
+  tag: "sha-05859b5"
 
 # NOTE: no replicaCount here on purpose. autoscaling.enabled below means the
 # chart's deployment template omits `replicas` entirely and the HPA owns it -
