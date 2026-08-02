@@ -1,4 +1,6 @@
-# See networkpolicy-dev.yaml's comment - same rule, mirrored for staging.
+# See networkpolicy-dev.yaml's comment - same rule, mirrored for staging, and
+# the same public-subnet ipBlock (both namespaces sit on the dev cluster, so
+# they share its 10.0.32.0/19 public range).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -10,4 +12,8 @@ spec:
     - Ingress
   ingress:
     - from:
+        # pods in this namespace
         - podSelector: {}
+        # the internet-facing ALB's ENIs - public subnets only
+        - ipBlock:
+            cidr: 10.0.32.0/19
