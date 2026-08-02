@@ -1,11 +1,27 @@
 # Default-deny cross-namespace ingress: dev and staging share one cluster,
 # so this (plus the AppProject/namespace/quota split) is what actually keeps
-# them apart, rather than a separate control plane. Known limitation - the
-# VPC CNI must have network policy enforcement explicitly enabled for this
-# to be enforced in-cluster (not just accepted by the API); see infra's
-# README for that flag. Traffic entering via the ALB (target-type ip) reaches
-# pods directly through the VPC, outside this podSelector-based rule, so it
-# is unaffected either way.
+# them apart, rather than a separate control plane.
+#
+# ENFORCEMENT: a NetworkPolicy is enforced by the CNI, not by Kubernetes. The
+# AWS VPC CNI ships with it OFF, so the API accepts this object and nothing
+# acts on it - no error, no event; it reads as configured while doing nothing.
+# Turn it on with `enableNetworkPolicy = "true"` in the vpc-cni addon's
+# configuration_values; see infra's README.
+#
+# The ipBlock below is why enabling it is not just a flag flip. The Ingress
+# uses target-type: ip, so the ALB connects STRAIGHT to pod IPs rather than
+# via a NodePort. Those connections come from the ALB's ENIs, not from a pod,
+# so `podSelector: {}` does not match them - the moment enforcement is turned
+# on, a default-deny drops the ALB's health checks and all its traffic, and
+# the app stops serving.
+#
+# The allowance is deliberately the PUBLIC subnet range, not the VPC range.
+# With the VPC CNI pods hold ordinary VPC addresses out of the PRIVATE
+# subnets, so allowing the whole VPC CIDR (10.0.0.0/16) would also allow every
+# pod on the cluster and defeat the isolation this file exists to create.
+# internet-facing ALBs live in the public subnets (10.0.32.0/20 + 10.0.48.0/20
+# = 10.0.32.0/19), which pods never occupy. That range admits the load
+# balancer and nothing else.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -17,4 +33,8 @@ spec:
     - Ingress
   ingress:
     - from:
+        # pods in this namespace
         - podSelector: {}
+        # the internet-facing ALB's ENIs - public subnets only, see above
+        - ipBlock:
+            cidr: 10.0.32.0/19
