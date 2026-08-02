@@ -17,3 +17,12 @@ spec:
         # the internet-facing ALB's ENIs - public subnets only
         - ipBlock:
             cidr: 10.0.32.0/19
+        # Prometheus, which lives in the monitoring namespace on a PRIVATE
+        # subnet - so it is matched by neither podSelector (different
+        # namespace) nor the public-subnet ipBlock above. Without this the
+        # chart's ServiceMonitor is discovered and every scrape times out:
+        # targets show `down` with "context deadline exceeded" while the
+        # ServiceMonitor object itself looks perfectly healthy.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
