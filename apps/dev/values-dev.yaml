@@ -7,7 +7,7 @@
 # that match the real FastAPI app (/healthz, /readyz).
 image:
   repository: 302954730632.dkr.ecr.us-east-1.amazonaws.com/devops-task-app
-  tag: "sha-46ddaed"
+  tag: "sha-59125c2"
 
 replicaCount: 1
 
