@@ -5,7 +5,7 @@
 # placeholder image as dev.
 image:
   repository: 302954730632.dkr.ecr.us-east-1.amazonaws.com/devops-task-app
-  tag: "sha-05859b5"
+  tag: "sha-ad319c5"
 
 replicaCount: 2
 
