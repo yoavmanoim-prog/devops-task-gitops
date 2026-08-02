@@ -1,0 +1,37 @@
+{{- if .Values.serviceMonitor.enabled }}
+# Tells the Prometheus Operator to scrape this chart's own pods.
+#
+# TWO things must be true or this object is accepted and collects nothing:
+#
+#  1. The app must actually serve .Values.serviceMonitor.path. This chart's app
+#     exposes /metrics via prometheus-fastapi-instrumentator; point it at a
+#     workload that doesn't and you get a scrape job returning 404 forever.
+#
+#  2. The labels below must match the Prometheus CR's serviceMonitorSelector.
+#     kube-prometheus-stack defaults that to matchLabels {release: <helm
+#     release>}, and a ServiceMonitor without it is simply never discovered -
+#     no error, no event, and `kubectl get servicemonitor` still lists it. This
+#     cluster's selector is {release: kube-prometheus-stack}; confirm with:
+#       kubectl get prometheus -n monitoring \
+#         -o jsonpath='{.items[0].spec.serviceMonitorSelector}'
+#
+# Verify it is really scraping via Prometheus' targets API rather than trusting
+# the object exists - see gitops/README.md.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "app.fullname" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    {{- with .Values.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http # the Service's named port, not a number
+      path: {{ .Values.serviceMonitor.path }}
+      interval: {{ .Values.serviceMonitor.interval }}
+{{- end }}
