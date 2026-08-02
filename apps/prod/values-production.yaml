@@ -4,7 +4,7 @@
 # deployment gate, this file landing is not the same as it going live.
 image:
   repository: 302954730632.dkr.ecr.us-east-1.amazonaws.com/devops-task-app
-  tag: "sha-05859b5"
+  tag: "sha-ad319c5"
 
 # NOTE: no replicaCount here on purpose. autoscaling.enabled below means the
 # chart's deployment template omits `replicas` entirely and the HPA owns it -
