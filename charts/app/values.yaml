@@ -75,6 +75,28 @@ autoscaling:
   maxReplicas: 3
   targetCPUUtilizationPercentage: 70
 
+# Off by default because it is actively harmful at one replica: maxUnavailable
+# 1 against a single pod lets a drain take the whole service anyway, and any
+# stricter budget blocks every drain forever. Only worth enabling where there
+# are several replicas - i.e. production.
+podDisruptionBudget:
+  enabled: false
+  maxUnavailable: 1
+
+# Prometheus scrape config for this chart's own pods. Off by default: a
+# ServiceMonitor whose target exposes no /metrics is a scrape job that silently
+# collects nothing, which is worse than not having one. Requires the Prometheus
+# Operator's CRD to exist on the cluster.
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  path: /metrics
+  # MUST match the Prometheus CR's serviceMonitorSelector or the object is
+  # created and never discovered. kube-prometheus-stack defaults it to the
+  # Helm release name.
+  labels:
+    release: kube-prometheus-stack
+
 # Plain (non-secret) env vars, e.g. [{name: APP_ENV, value: dev}]
 env: []
 

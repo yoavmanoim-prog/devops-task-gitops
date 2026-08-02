@@ -1,0 +1,28 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+# Caps how many replicas a VOLUNTARY disruption may remove at once - node
+# drains, cluster upgrades, and (relevant here) the SPOT reclaim path, which
+# drains the node before the instance goes away. Without one, a single drain
+# can evict every replica simultaneously and the service is down until the
+# rescheduled pods pass their readiness probes.
+#
+# It does NOT protect against involuntary loss (a node dying outright), and it
+# cannot conjure capacity: with maxUnavailable set and no spare room on the
+# remaining nodes, the drain simply blocks instead. That is the intended
+# trade-off - a stuck drain is a visible problem, an emptied Deployment is not.
+#
+# maxUnavailable rather than minAvailable on purpose: this Deployment's replica
+# count is owned by the HPA, so it moves between minReplicas and maxReplicas. A
+# fixed minAvailable would mean something different at 3 replicas than at 8,
+# whereas "at most one at a time" holds at every size.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "app.fullname" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+{{- end }}

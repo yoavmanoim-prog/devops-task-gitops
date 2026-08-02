@@ -25,6 +25,21 @@ autoscaling:
   maxReplicas: 8
   targetCPUUtilizationPercentage: 65
 
+# Only enabled here - dev and staging run too few replicas for a budget to be
+# anything but an obstruction. Matters more than usual on this cluster because
+# the nodes are SPOT: a reclaim drains the node first, and without a budget one
+# drain can evict every replica at once.
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+
+# Enabled only after the app actually grew a /metrics endpoint. Prometheus was
+# running here the whole time collecting node and control-plane metrics, while
+# nothing scraped the application - so there was no request rate, latency or
+# error rate for the service this cluster exists to run.
+serviceMonitor:
+  enabled: true
+
 ingress:
   enabled: true
   host: app.devops-task.internal # placeholder - no real DNS/ACM wired up, see README
